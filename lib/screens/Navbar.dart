@@ -4,6 +4,8 @@ import 'Home.dart';
 import 'Account.dart';
 
 class Navbar extends StatefulWidget {
+  var data;
+  Navbar({required this.data});
   @override
   _Navbar createState() => _Navbar();
 }
@@ -15,11 +17,7 @@ class _Navbar extends State<Navbar> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: [
-          Home(),
-          Post(),
-          Account()
-        ],
+        children: [Home(), Post(authData: widget.data,), Account(data: widget.data)],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color.fromARGB(255, 243, 33, 138),
@@ -33,7 +31,8 @@ class _Navbar extends State<Navbar> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.post_add), label: 'Reviews'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_box), label: 'Profile'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_box), label: 'Profile'),
         ],
       ),
     );

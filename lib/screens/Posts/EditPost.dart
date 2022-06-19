@@ -6,7 +6,8 @@ import 'Post.dart';
 
 class EditPost extends StatefulWidget {
   final Map post;
-  EditPost({required this.post});
+  final Map auth;
+  EditPost({required this.post, required this.auth});
   @override
   _EditPost createState() => _EditPost();
 }
@@ -16,21 +17,22 @@ class _EditPost extends State<EditPost> {
   double sliderKepuasan = 3;
   double sliderKebersihan = 3;
   TextEditingController reviewController = TextEditingController();
-  int user_id = 4;
 
   Future updatePost() async {
     String kepuasan = sliderKepuasan.toInt().toString();
     String kebersihan = sliderKebersihan.toInt().toString();
 
     Map data = {
-      "user_id": "${user_id}",
+      "user_id": "${widget.auth['id']}",
       "kepuasan": "${kepuasan}",
       "kebersihan": "${kebersihan}",
       "pesan": reviewController.text
     };
 
-    final response = await http
-        .put(Uri.parse("http://10.0.2.2:8000/api/review/"+widget.post['id'].toString()), body: data);
+    final response = await http.put(
+        Uri.parse(
+            "http://10.0.2.2:8000/api/review/" + widget.post['id'].toString()),
+        body: data);
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -85,7 +87,7 @@ class _EditPost extends State<EditPost> {
                         alignment: Alignment.centerLeft,
                         child: Text("Kepuasan:")),
                     Slider(
-                      activeColor: Color.fromARGB(255, 243, 33, 138),
+                        activeColor: Color.fromARGB(255, 243, 33, 138),
                         min: 1,
                         max: 5,
                         divisions: 4,
@@ -99,7 +101,7 @@ class _EditPost extends State<EditPost> {
                         alignment: Alignment.centerLeft,
                         child: Text("Kebersihan:")),
                     Slider(
-                      activeColor: Color.fromARGB(255, 243, 33, 138),
+                        activeColor: Color.fromARGB(255, 243, 33, 138),
                         min: 1,
                         max: 5,
                         divisions: 4,
@@ -112,13 +114,14 @@ class _EditPost extends State<EditPost> {
                         child: const Icon(Icons.send),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            updatePost().then((value) {});
-                            //snackbar
-                            const snackBar = SnackBar(
-                              content: Text("Review has been updated"),
-                            );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
+                            updatePost().then((value) {
+                              //snackbar
+                              const snackBar = SnackBar(
+                                content: Text("Review has been updated"),
+                              );
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(snackBar);
+                            });
                           } else {}
                         })
                   ],

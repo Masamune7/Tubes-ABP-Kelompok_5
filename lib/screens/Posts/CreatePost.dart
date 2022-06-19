@@ -4,6 +4,8 @@ import 'Post.dart';
 import 'package:http/http.dart' as http;
 
 class CreatePost extends StatefulWidget {
+  final Map auth;
+  CreatePost({required this.auth});
   _CreatePost createState() => _CreatePost();
 }
 
@@ -12,14 +14,13 @@ class _CreatePost extends State<CreatePost> {
   double sliderKepuasan = 3;
   double sliderKebersihan = 3;
   TextEditingController reviewController = TextEditingController();
-  int user_id = 4;
 
   Future savePost() async {
     String kepuasan = sliderKepuasan.toInt().toString();
     String kebersihan = sliderKebersihan.toInt().toString();
 
     Map data = {
-      "user_id": "${user_id}",
+      "user_id": "${widget.auth['id']}",
       "kepuasan": "${kepuasan}",
       "kebersihan": "${kebersihan}",
       "pesan": reviewController.text
@@ -95,7 +96,7 @@ class _CreatePost extends State<CreatePost> {
                         alignment: Alignment.centerLeft,
                         child: Text("Kebersihan:")),
                     Slider(
-                      activeColor: Color.fromARGB(255, 243, 33, 138),
+                        activeColor: Color.fromARGB(255, 243, 33, 138),
                         min: 1,
                         max: 5,
                         divisions: 4,
@@ -116,7 +117,7 @@ class _CreatePost extends State<CreatePost> {
                                   .showSnackBar(snackBar);
                             });
                             //snackbar
-                          } else {}
+                          }
                         })
                   ],
                 ))),

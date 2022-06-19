@@ -5,6 +5,8 @@ import 'package:testing/screens/Posts/CreatePost.dart';
 import 'package:testing/screens/Posts/EditPost.dart';
 
 class Post extends StatefulWidget {
+  var authData;
+  Post({required this.authData});
   @override
   _Post createState() => _Post();
 }
@@ -68,7 +70,7 @@ class _Post extends State<Post> {
                         child: Card(
                           elevation: 5,
                           child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
                                 //Content Images
                                 Container(
@@ -130,18 +132,22 @@ class _Post extends State<Post> {
                                   ],
                                 ),
                                 //Content Buttons
+                                if(snapshot.data[0][index]['user_id'] ==
+                                            widget.authData[0]['id'])
                                 Row(children: [
-                                  IconButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => EditPost(
-                                                    post: snapshot.data[0]
-                                                        [index]))).then(
-                                            (_) => setState(() {}));
-                                      },
-                                      icon: const Icon(Icons.edit)),
+                                        IconButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditPost(
+                                                              post: snapshot
+                                                                      .data[0][
+                                                                  index], auth: widget.authData[0],))).then(
+                                                  (_) => setState(() {}));
+                                            },
+                                        icon: const Icon(Icons.edit)),
                                   IconButton(
                                       onPressed: () {
                                         deletePost(snapshot.data[0][index]['id']
@@ -158,6 +164,9 @@ class _Post extends State<Post> {
                                       },
                                       icon: const Icon(Icons.delete)),
                                 ]),
+                                if(snapshot.data[0][index]['user_id'] !=
+                                            widget.authData[0]['id'])
+                                SizedBox(),
                               ]),
                         ),
                       );
@@ -171,7 +180,7 @@ class _Post extends State<Post> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CreatePost()))
+                    MaterialPageRoute(builder: (context) => CreatePost(auth: widget.authData[0])))
                 .then((_) => setState(() {}));
           },
           foregroundColor: Colors.white,
