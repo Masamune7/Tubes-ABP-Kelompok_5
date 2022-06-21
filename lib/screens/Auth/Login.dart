@@ -95,7 +95,7 @@ class _LoginState extends State<Login> {
                       height: 50,
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       child: ElevatedButton(
-                        child: const Text('Log In'),
+                        child: const Text('Login'),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             login(userNameController.text,

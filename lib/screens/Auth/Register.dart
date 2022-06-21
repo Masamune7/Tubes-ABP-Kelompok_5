@@ -136,7 +136,7 @@ class _Register extends State<Register> {
                       height: 50,
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       child: ElevatedButton(
-                        child: const Text('Submit'),
+                        child: const Text('Register'),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             saveUser().then((value) {
