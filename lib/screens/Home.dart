@@ -1,341 +1,220 @@
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
-class Home extends StatelessWidget {
+///
+import 'package:testing/model/model.dart';
+
+class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> animation;
+
+  late final AnimationController controllerScale =
+      AnimationController(duration: const Duration(seconds: 10), vsync: this)
+        ..repeat(reverse: true);
+
+  late final Animation<double> animationScale = Tween<double>(
+          begin: 1.0, end: 1.2)
+      .animate(CurvedAnimation(parent: controllerScale, curve: Curves.linear));
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    animation = Tween(begin: 0.0, end: 1.0).animate(controller);
+
+    controller.forward();
+    controllerScale.repeat(reverse: true);
+  }
+
+  Animation<double> get scaleAnime {
+    return animationScale;
+  }
+
+  @override
+  void dispose() {
+    controllerScale.dispose();
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    var textTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home Page Orchid'),
+        title: Text('Home'),
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 243, 33, 138),
       ),
-      body: ListView(
-        children: <Widget>[
-          ImageSlideshow(
-            /// Width of the [ImageSlideshow].
-            width: double.infinity,
+      body: PageView.builder(
+      physics: const BouncingScrollPhysics(),
+      itemCount: locations.length,
+      itemBuilder: (ctx, index) {
+        return Stack(
+          children: [
+            ScaleTransition(
+              scale: scaleAnime,
+              child: Container(
+                width: size.width,
+                height: size.height,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(locations[index].img),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            Items(size: size, index: index, textTheme: textTheme),
+          ],
+        );
+      },
+    ));
+  }
+}
 
-            /// Height of the [ImageSlideshow].
-            height: 200,
+class Items extends StatelessWidget {
+  const Items({
+    Key? key,
+    required this.size,
+    required this.index,
+    required this.textTheme,
+  }) : super(key: key);
 
-            /// The page to show when first creating the [ImageSlideshow].
-            initialPage: 0,
+  final Size size;
+  final int index;
+  final TextTheme textTheme;
 
-            /// The color to paint the indicator.
-            indicatorColor: Colors.blue,
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        /// Bottom Gradient
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            width: size.width,
+            height: size.height / 1.8,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+                Colors.black,
+                Colors.black.withOpacity(0.6),
+                Colors.transparent
+              ], end: Alignment.topCenter, begin: Alignment.bottomCenter),
+            ),
+          ),
+        ),
 
-            /// The color to paint behind th indicator.
-            indicatorBackgroundColor: Colors.grey,
-
-            /// The widgets to display in the [ImageSlideshow].
-            /// Add the sample image file into the images folder
+        /// Texts
+        Padding(
+          padding: const EdgeInsets.only(left: 25, bottom: 20, right: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Image.asset(
-                'assets/asset1.jpg',
-                fit: BoxFit.cover,
+              /// Title
+              FadeInUp(
+                delay: const Duration(microseconds: 100),
+                duration: const Duration(milliseconds: 500),
+                from: 40,
+                child: Text(locations[index].title, style: textTheme.headline1!.merge(TextStyle(color: Colors.white))),
               ),
-              Image.asset(
-                'assets/asset2.jpg',
-                fit: BoxFit.cover,
+
+              /// Bar Rating
+              FadeInUp(
+                duration: const Duration(milliseconds: 500),
+                delay: const Duration(milliseconds: 200),
+                from: 40,
+                child: Container(
+                  margin: const EdgeInsets.only(
+                    bottom: 8,
+                  ),
+                  width: size.width,
+                  height: size.height / 25,
+                  child: Row(
+                    children: [
+                      RatingBar.builder(
+                        itemSize: 16,
+                        unratedColor: const Color.fromARGB(179, 191, 191, 191),
+                        onRatingUpdate: (_) {},
+                        initialRating: locations[index].star,
+                        minRating: 0,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemPadding:
+                            const EdgeInsets.symmetric(horizontal: 2.0),
+                        itemBuilder: (context, _) => const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Text(
+                        "${locations[index].star.toInt()} / 5",
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w300),
+                      )
+                    ],
+                  ),
+                ),
               ),
-              Image.asset(
-                'assets/asset3.jpg',
-                fit: BoxFit.cover,
+
+              ///
+              const SizedBox(
+                height: 12,
+              ),
+
+              /// SubTitle
+              FadeInUp(
+                duration: const Duration(milliseconds: 500),
+                delay: const Duration(milliseconds: 400),
+                from: 40,
+                child: Text(locations[index].subTitle,
+                    maxLines: 7,
+                    overflow: TextOverflow.ellipsis,
+                    style: textTheme.subtitle1!.merge(TextStyle(color: Colors.white))),
+              ),
+
+              ///
+              const SizedBox(
+                height: 15,
+              ),
+
+              /// Read More
+              FadeInUp(
+                duration: const Duration(milliseconds: 500),
+                delay: const Duration(milliseconds: 600),
+                from: 40,
+                child: const Text(
+                  "Buy Ticket Now",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 15),
+                ),
               ),
             ],
-
-            /// Called whenever the page in the center of the viewport changes.
-            // onPageChanged: (value) {
-            //   print('Page changed: $value');
-            // },
-
-            /// Auto scroll interval.
-            /// Do not auto scroll with null or 0.
-            autoPlayInterval: 3000,
-
-            /// Loops back to first slide.
-            isLoop: true,
           ),
-          // Logo
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Image.asset(
-                'assets/asset-logo.jpg',
-                height: 80,
-                fit: BoxFit.fitWidth,
-              ),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'Wisata Orchid',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // Container(
-          //   margin: const EdgeInsets.all(10.0),
-          //   height: 150.0,
-          //   width: 200.0,
-          //   decoration: BoxDecoration(color: Colors.amber),
-          //   child: Text('Text'),
-          // ),
-          // Container(
-          //   margin: const EdgeInsets.all(10.0),
-          //   height: 150.0,
-          //   width: 200.0,
-          //   decoration: BoxDecoration(color: Colors.amber),
-          //   child: Text('Text'),
-          // ),
-
-          // Container(
-          //   margin: const EdgeInsets.all(10.0),
-          //   height: 150.0,
-          //   width: 200.0,
-          //   decoration: BoxDecoration(color: Colors.amber),
-          //   child: Image.asset(
-          //     'assets/asset5.jpg',
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
-
-          Container(
-            height: 300.0, //Ganti tinggi section
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              shrinkWrap: true,
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150.0, //Ganti Ukuran kotak
-                  width: 300.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 77, 20, 40),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  child: Image.asset(
-                    'assets/asset4.jpg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150.0, //Ganti Ukuran kotak
-                  width: 300.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 77, 20, 40),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  child: Image.asset(
-                    'assets/asset2.jpg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150.0, //Ganti Ukuran kotak
-                  width: 300.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 77, 20, 40),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  child: Image.asset(
-                    'assets/asset3.jpg',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-// Slide Bagian 2
-          Container(
-            height: 24,
-            child: Stack(
-              children: const <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 9),
-                  child: Text(
-                    "Jenis Tanaman Hias",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Container(
-            height: 200.0, //Ganti tinggi section
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              shrinkWrap: true,
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150, //Ganti Ukuran kotak
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 110, 29, 57),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  // decoration: BoxDecoration(color: Colors.amber),
-                  child: const Image(
-                    image: NetworkImage(
-                        'https://images.pexels.com/photos/1038008/pexels-photo-1038008.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1s'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150, //Ganti Ukuran kotak
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 110, 29, 57),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  // decoration: BoxDecoration(color: Colors.amber),
-                  child: const Image(
-                    image: NetworkImage(
-                        'https://images.pexels.com/photos/4671550/pexels-photo-4671550.jpeg?cs=srgb&dl=pexels-ekaterina-belinskaya-4671550.jpg&fm=jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150, //Ganti Ukuran kotak
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 110, 29, 57),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  // decoration: BoxDecoration(color: Colors.amber),
-                  child: const Image(
-                    image: NetworkImage(
-                        'https://images.pexels.com/photos/8149847/pexels-photo-8149847.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150, //Ganti Ukuran kotak
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: const Color.fromARGB(255, 110, 29, 57),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  // decoration: BoxDecoration(color: Colors.amber),
-                  child: const Image(
-                    image: NetworkImage(
-                        'https://images.pexels.com/photos/7477559/pexels-photo-7477559.jpeg?cs=srgb&dl=pexels-ti%E1%BB%83u-b%E1%BA%A3o-tr%C6%B0%C6%A1ng-7477559.jpg&fm=jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10.0),
-                  height: 150, //Ganti Ukuran kotak
-                  width: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Color.fromARGB(255, 110, 29, 57),
-                        width: 8.0,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.yellowAccent,
-                  ),
-                  // decoration: BoxDecoration(color: Colors.amber),
-                  child: const Image(
-                    image: NetworkImage(
-                        'https://images.pexels.com/photos/6096074/pexels-photo-6096074.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-// Bagian text
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Image.asset(
-                'assets/asset-logo.jpg',
-                height: 80,
-                fit: BoxFit.fitWidth,
-              ),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'Harga Tiket',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const Text(
-            'Harga Tiket Local',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-
-          TextButton(
-            style: TextButton.styleFrom(
-              primary: Colors.red,
-            ),
-            onPressed: () {},
-            child: const Text('Rp.-200.000 (tiket_Reguler)'),
-          ),
-
-          TextButton(
-            style: TextButton.styleFrom(
-              primary: Colors.red,
-            ),
-            onPressed: () {},
-            child: const Text('Rp.-220.000 (tiket_Silver)'),
-          ),
-
-          TextButton(
-            style: TextButton.styleFrom(
-              primary: Colors.red,
-            ),
-            onPressed: () {},
-            child: const Text('Rp.-250.000 (tiket_Gold)'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
